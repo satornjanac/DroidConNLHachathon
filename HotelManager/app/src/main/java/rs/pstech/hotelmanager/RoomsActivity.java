@@ -1,6 +1,9 @@
 package rs.pstech.hotelmanager;
 
+import android.app.ActivityOptions;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -27,8 +30,10 @@ public class RoomsActivity extends AbsWunderbarActivity {
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Bitmap d = view.getDrawingCache();
+                Bundle b = ActivityOptions.makeThumbnailScaleUpAnimation(view, d, 0, 0).toBundle();
                 Intent i = new Intent(RoomsActivity.this, MainActivity.class);
-                startActivity(i);
+                startActivity(i, b);
             }
         });
         mListView.setEmptyView(findViewById(R.id.progress_bar));

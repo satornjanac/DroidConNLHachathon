@@ -22,7 +22,7 @@
         </activity>
 
         <activity
-            android:name="rs.pstech.hotelmanager.MainActivity"
+            android:name=".RoomInfoActivity"
             android:label="@string/app_name"
             android:parentActivityName=".RoomsActivity">
             <!-- Parent activity meta-data to support 4.0 and lower -->

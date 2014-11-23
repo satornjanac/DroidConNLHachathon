@@ -7,7 +7,7 @@
     <application
         android:name=".HotelManagerApp"
         android:allowBackup="true"
-        android:icon="@drawable/ic_launcher"
+        android:icon="@drawable/logo"
         android:label="@string/app_name"
         android:theme="@style/AppTheme.Base">
 
@@ -23,7 +23,14 @@
 
         <activity
             android:name="rs.pstech.hotelmanager.MainActivity"
-            android:label="@string/app_name"></activity>
+            android:label="@string/app_name"
+            android:parentActivityName=".RoomsActivity">
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".RoomsActivity" />
+            >
+        </activity>
 
         <activity
             android:name="rs.pstech.hotelmanager.PreferencesActivity"

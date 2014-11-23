@@ -37,7 +37,10 @@ public class RoomsActivity extends AbsWunderbarActivity {
             setSupportActionBar(toolbar);
             getSupportActionBar().setTitle(R.string.app_name);
         } else {
-            toolbar.setTitle(R.string.app_name);
+            // toolbar.setTitle(R.string.app_name);
+            //toolbar.setTitleTextColor(getResources().getColor(R.color.textColorToolbar));
+            toolbar.setLogo(R.drawable.logo);
+            //toolbar.setNavigationIcon(R.drawable.logo);
             toolbar.inflateMenu(R.menu.menu_main);
             toolbar.setOnMenuItemClickListener(new android.support.v7.widget.Toolbar.OnMenuItemClickListener() {
                 @Override

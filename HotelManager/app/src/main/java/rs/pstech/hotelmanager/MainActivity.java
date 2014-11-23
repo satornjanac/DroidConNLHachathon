@@ -35,8 +35,8 @@ public class MainActivity extends AbsWunderbarActivity {
     private String KEY_TEMP = "key_temp";
     private String KEY_HUM = "key_hum";
 
-    private static int DECIBELS_MIN = 30;
-    private static int DECIBELS_MAX = 120;
+    private static int DECIBELS_MIN = 0;
+    private static int DECIBELS_MAX = 150;
 
     private float light_value;
     private float sound_value;
@@ -52,7 +52,7 @@ public class MainActivity extends AbsWunderbarActivity {
             setSupportActionBar(toolbar);
             getSupportActionBar().setTitle(R.string.app_name);
         } else {
-            toolbar.setTitle(R.string.app_name);
+            toolbar.setLogo(R.drawable.logo);
             toolbar.inflateMenu(R.menu.menu_main);
             toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
                 @Override

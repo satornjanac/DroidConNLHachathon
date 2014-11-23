@@ -4,4 +4,5 @@
     <color name="backgroundDefault">#FAFAFA</color>
     <color name="textColor">#000000</color>
     <color name="textColorGreen">#1b5e20</color>
+    <color name="textColorToolbar">#757575</color>
 </resources>

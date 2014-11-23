@@ -1,8 +1,8 @@
 package rs.pstech.hotelmanager;
 
-import android.app.Activity;
-import android.graphics.Color;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -28,7 +28,7 @@ import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 
-public class MainActivity extends Activity implements LoginEventListener {
+public class MainActivity extends ActionBarActivity implements LoginEventListener {
 
     private TextView mTextViewSound;
     private TextView mTextViewTemp;
@@ -53,11 +53,22 @@ public class MainActivity extends Activity implements LoginEventListener {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        if (toolbar == null) {
+            setSupportActionBar(toolbar);
+            getSupportActionBar().setTitle("Hotel Manager");
+        } else {
+            toolbar.setTitle("Hotel Manager");
         init();
         if (savedInstanceState != null) {
             restoreStates(savedInstanceState);
         }
 
+        // fensi tranzicija
+/*        ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(
+                activity, transitionView, DetailActivity.EXTRA_IMAGE);
+        ActivityCompat.startActivity(activity, new Intent(activity, DetailActivity.class),
+                options.toBundle());*/
     }
 
     private void init(){

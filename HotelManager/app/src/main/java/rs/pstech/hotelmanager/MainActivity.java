@@ -1,7 +1,8 @@
 package rs.pstech.hotelmanager;
 
-import android.app.Activity;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
@@ -24,7 +25,7 @@ import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 
-public class MainActivity extends Activity implements LoginEventListener {
+public class MainActivity extends ActionBarActivity implements LoginEventListener {
 
     private TextView mTextViewMain;
 
@@ -32,6 +33,13 @@ public class MainActivity extends Activity implements LoginEventListener {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        if (toolbar == null) {
+            setSupportActionBar(toolbar);
+            getSupportActionBar().setTitle("Hotel Manager");
+        } else {
+            toolbar.setTitle("Hotel Manager");
+        }
         mTextViewMain = (TextView)findViewById(R.id.textview_main);
     }
 

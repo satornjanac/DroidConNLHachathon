@@ -9,6 +9,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -38,14 +39,16 @@ public class MainActivity extends AbsWunderbarActivity {
     private static int DECIBELS_MIN = 0;
     private static int DECIBELS_MAX = 150;
 
-    private float light_value;
-    private float sound_value;
-    private float temperature_value;
-    private float hum_value;
+    private float mLightValue;
+    private float mSoundValue;
+    private float mTemperatureValue;
+    private float mHumidityValue;
+    private int mUsersSoundLevel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Window window = getWindow();
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         if (toolbar == null) {
@@ -68,6 +71,7 @@ public class MainActivity extends AbsWunderbarActivity {
                 }
             });
         }
+        window.setAllowEnterTransitionOverlap(true);
         init();
         if (savedInstanceState != null) {
             restoreStates(savedInstanceState);
@@ -86,10 +90,10 @@ public class MainActivity extends AbsWunderbarActivity {
     }
 
     private void restoreStates(Bundle bundle) {
-        light_value = bundle.getFloat(KEY_LIGHT, 0);
-        sound_value = bundle.getFloat(KEY_SOUND, 0);
-        temperature_value = bundle.getFloat(KEY_TEMP, 0);
-        hum_value = bundle.getFloat(KEY_HUM, 0);
+        mLightValue = bundle.getFloat(KEY_LIGHT, 0);
+        mSoundValue = bundle.getFloat(KEY_SOUND, 0);
+        mTemperatureValue = bundle.getFloat(KEY_TEMP, 0);
+        mHumidityValue = bundle.getFloat(KEY_HUM, 0);
         updateTemperatureUI();
         updateLightUI();
         updateSoundUI();
@@ -97,10 +101,10 @@ public class MainActivity extends AbsWunderbarActivity {
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        outState.getFloat(KEY_LIGHT, light_value);
-        outState.getFloat(KEY_SOUND, sound_value);
-        outState.getFloat(KEY_TEMP, temperature_value);
-        outState.getFloat(KEY_HUM, hum_value);
+        outState.getFloat(KEY_LIGHT, mLightValue);
+        outState.getFloat(KEY_SOUND, mSoundValue);
+        outState.getFloat(KEY_TEMP, mTemperatureValue);
+        outState.getFloat(KEY_HUM, mHumidityValue);
         super.onSaveInstanceState(outState);
     }
 
@@ -127,8 +131,8 @@ public class MainActivity extends AbsWunderbarActivity {
                     @Override
                     public void onNext(Object o) {
                         Reading reading = new Gson().fromJson(o.toString(), Reading.class);
-                        temperature_value = reading.temp;
-                        hum_value = reading.hum;
+                        mTemperatureValue = reading.temp;
+                        mHumidityValue = reading.hum;
                         updateTemperatureUI();
                     }
                 });
@@ -142,17 +146,17 @@ public class MainActivity extends AbsWunderbarActivity {
         int HIGH_TEMPERATURE = Integer.parseInt(sharedPrefs
                 .getString(getResources().getString(R.string.max_temp_key),
                         getResources().getString(R.string.default_max_temp)));
-        if (temperature_value < LOW_TEMPERATURE) {
+        if (mTemperatureValue < LOW_TEMPERATURE) {
             mTempImage.setBackground(getResources().getDrawable(R.drawable.low));
             mTextViewTemp.setTextColor(Color.RED);
-        } else if (LOW_TEMPERATURE < temperature_value && temperature_value < HIGH_TEMPERATURE) {
+        } else if (LOW_TEMPERATURE < mTemperatureValue && mTemperatureValue < HIGH_TEMPERATURE) {
             mTempImage.setBackground(getResources().getDrawable(R.drawable.optimal));
             mTextViewTemp.setTextColor(getResources().getColor(R.color.textColorGreen));
         } else {
             mTempImage.setBackground(getResources().getDrawable(R.drawable.high));
             mTextViewTemp.setTextColor(Color.RED);
         }
-        mTextViewTemp.setText(temperature_value + "˚C, " + hum_value + "mbar");
+        mTextViewTemp.setText(mTemperatureValue + "˚C, " + mHumidityValue + "mbar");
         mTempImage.setVisibility(View.VISIBLE);
         mTempImage.invalidate();
     }
@@ -174,16 +178,16 @@ public class MainActivity extends AbsWunderbarActivity {
                     @Override
                     public void onNext(Object o) {
                         Reading reading = new Gson().fromJson(o.toString(), Reading.class);
-                        light_value = reading.light;
+                        mLightValue = reading.light;
                         updateLightUI();
                     }
                 });
     }
 
     private void updateLightUI() {
-        if (light_value != 0) {
+        if (mLightValue != 0) {
             mLightImage.setBackground(getResources().getDrawable(R.drawable.light_on));
-            if (sound_value < 40.0f) {
+            if (mSoundValue < 40.0f) {
                 mLightErrorMsg.setTextColor(Color.RED);
                 mLightErrorMsg.setText(getResources().getText(R.string.room_is_empty));
             } else {
@@ -213,7 +217,7 @@ public class MainActivity extends AbsWunderbarActivity {
                     @Override
                     public void onNext(Object o) {
                         Reading reading = new Gson().fromJson(o.toString(), Reading.class);
-                        sound_value = reading.snd_level;
+                        mSoundValue = reading.snd_level;
                         updateSoundUI();
                     }
                 });
@@ -221,16 +225,16 @@ public class MainActivity extends AbsWunderbarActivity {
 
     private void updateSoundUI() {
         SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-        int soundLevel = Integer.parseInt(sharedPrefs
+        mUsersSoundLevel = Integer.parseInt(sharedPrefs
                 .getString(getResources().getString(R.string.sound_limit_key),
                         getResources().getString(R.string.sound_limit_default)));
-        mTextViewSound.setText(sound_value + "dB");
-        if (sound_value > soundLevel) {
+        mTextViewSound.setText(mSoundValue + "dB");
+        if (mSoundValue > mUsersSoundLevel) {
             mTextViewSound.setTextColor(Color.RED);
         } else {
             mTextViewSound.setTextColor(getResources().getColor(R.color.textColorGreen));
         }
-        updateNoise((int)sound_value);
+        updateNoise((int) mSoundValue);
     }
 
     @Override
@@ -263,9 +267,9 @@ public class MainActivity extends AbsWunderbarActivity {
 
     private int caculateNoiseLevel(int decibels) {
         int level = 0;
-        if (decibels > DECIBELS_MIN) {
-            if (decibels < DECIBELS_MAX) {
-                level = (int) (( (float) decibels / (float) (DECIBELS_MAX - DECIBELS_MIN) ) *100 );
+        if (decibels >= DECIBELS_MIN) {
+            if (decibels < mUsersSoundLevel) {
+                level = (int) (((float) decibels / (float) (DECIBELS_MAX - DECIBELS_MIN)) * 100);
             } else {
                 level = 100;
             }

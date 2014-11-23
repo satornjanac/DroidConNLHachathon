@@ -45,7 +45,9 @@ public class RoomsAdapter extends ArrayAdapter<TransmitterDevice> {
         TextView textViewRoom = (TextView)view.findViewById(R.id.textview_room);
         TransmitterDevice device = getItem(position);
         textViewRoom.setText(roomsMap.get(device.id));
-        ((ImageView)view.findViewById(R.id.imageview_room)).setImageResource(imagesMap.get(device.id));
+        ((ImageView)view.findViewById(R.id.imageview_room)).setImageResource(
+                imagesMap.get(device.id));
+        view.setDrawingCacheEnabled(true);
         return view;
     }
 }

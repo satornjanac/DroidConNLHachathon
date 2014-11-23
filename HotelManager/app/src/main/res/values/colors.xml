@@ -3,4 +3,5 @@
     <color name="colorPrimary">#FFB74D</color>
     <color name="backgroundDefault">#FAFAFA</color>
     <color name="textColor">#000000</color>
+    <color name="textColorGreen">#1b5e20</color>
 </resources>

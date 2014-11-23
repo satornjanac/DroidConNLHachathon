@@ -41,6 +41,12 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
             toolbar.setTitle("Hotel Manager");
         }
         mTextViewMain = (TextView)findViewById(R.id.textview_main);
+
+        // fensi tranzicija
+/*        ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(
+                activity, transitionView, DetailActivity.EXTRA_IMAGE);
+        ActivityCompat.startActivity(activity, new Intent(activity, DetailActivity.class),
+                options.toBundle());*/
     }
 
     @Override

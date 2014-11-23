@@ -1,0 +1,5 @@
+HotelManager/.idea
+HotelManager/.gradle
+HotelManager/build
+HotelManager/app/build
+*.iml

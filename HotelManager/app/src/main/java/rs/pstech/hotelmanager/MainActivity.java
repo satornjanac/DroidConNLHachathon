@@ -1,10 +1,9 @@
 package rs.pstech.hotelmanager;
 
-import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -60,14 +59,11 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
             getSupportActionBar().setTitle("Hotel Manager");
         } else {
             toolbar.setTitle("Hotel Manager");
+        }
         init();
         if (savedInstanceState != null) {
             restoreStates(savedInstanceState);
         }
-
-        Intent intent = new Intent(this, PreferencesActivity.class);
-        overridePendingTransition(0,0);
-        startActivity(intent);
     }
 
     private void init(){

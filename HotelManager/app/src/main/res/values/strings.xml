@@ -15,7 +15,8 @@
 
     <string name="default_min_temp">20</string>
     <string name="default_max_temp">25</string>
-    <string name="sound_limit_default">50</string>
+
+    <string name="sound_limit_default">80</string>
 
     <string-array name="temperature_values">
         <item>"15"</item>
@@ -54,5 +55,11 @@
         <item>"29"</item>
         <item>"30"</item>
     </string-array>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="temp_hum">Temperature / Humidity</string>
+    <string name="sound">Sound</string>
+    <string name="light">Light</string>
+    <string name="room_is_empty">Light is on, but sound is low. Check if room is empty</string>
 
 </resources>

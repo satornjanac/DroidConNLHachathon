@@ -11,6 +11,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
@@ -37,19 +38,29 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
 
     private TextView mTextViewSound;
     private TextView mTextViewTemp;
+    private TextView mLightErrorMsg;
     private ImageView mTempImage;
     private ImageView mLightImage;
+    private ProgressBar mNoiseProgressBar;
 
     private String KEY_LIGHT = "key_light";
     private String KEY_SOUND = "key_sound";
     private String KEY_TEMP = "key_temp";
     private String KEY_HUM = "key_hum";
 
+    private static int DECIBELS_MIN = 30;
+    private static int DECIBELS_MAX = 120;
+
     private float light_value;
     private float sound_value;
     private float temperature_value;
     private float hum_value;
 
+    private Subscription mWebSocketSubscriptionSound;
+    private Subscription mWebSocketSubscriptionTemp;
+    private Subscription mWebSocketSubscriptionLight;
+    private Subscription mUserInfoSubscription;
+    private Subscription mDeviceSubscription;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,14 +93,22 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
         }
     }
 
-    private void init(){
-        mTextViewSound = (TextView) findViewById(R.id.textview_sound);
-        mTextViewTemp = (TextView) findViewById(R.id.textview_temp);
-        mLightImage = (ImageView) findViewById(R.id.light_image);
-        mTempImage = (ImageView) findViewById(R.id.temp_image);
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unSubscribeToUpdates();
     }
 
-    private void restoreStates(Bundle bundle){
+    private void init() {
+        mTextViewSound = (TextView) findViewById(R.id.textview_sound);
+        mTextViewTemp = (TextView) findViewById(R.id.textview_temp);
+        mLightErrorMsg = (TextView) findViewById(R.id.light_error_info);
+        mLightImage = (ImageView) findViewById(R.id.light_image);
+        mTempImage = (ImageView) findViewById(R.id.temp_image);
+        mNoiseProgressBar = (ProgressBar) findViewById(R.id.noise_progress_bar);
+    }
+
+    private void restoreStates(Bundle bundle) {
         light_value = bundle.getFloat(KEY_LIGHT, 0);
         sound_value = bundle.getFloat(KEY_SOUND, 0);
         temperature_value = bundle.getFloat(KEY_TEMP, 0);
@@ -125,7 +144,7 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
     }
 
     private void onLoggedIn() {
-        Subscription userInfoSubscription =
+        mUserInfoSubscription =
                 RelayrSdk.getRelayrApi().getUserInfo().subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(new Subscriber<User>() {
@@ -155,7 +174,7 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
     }
 
     private void loadDevices(User user) {
-        Subscription temperatureDeviceSubscription =
+        mDeviceSubscription =
                 RelayrSdk.getRelayrApi().getTransmitters(user.id).flatMap(
                         new Func1<List<Transmitter>, Observable<List<TransmitterDevice>>>() {
                             @Override
@@ -202,7 +221,7 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
     }
 
     private void subscribeForTemperatureUpdates(TransmitterDevice device) {
-        Subscription webSocketSubscription =
+        mWebSocketSubscriptionTemp =
                 RelayrSdk.getWebSocketClient().subscribe(device, new Subscriber<Object>() {
 
                     @Override
@@ -225,28 +244,30 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
     }
 
     private void updateTemperatureUI() {
-        SharedPreferences sharedPrefs = PreferenceManager
-                .getDefaultSharedPreferences(this);
-        int LOW_TEMPERATURE = Integer.parseInt(sharedPrefs.getString(getResources().getString(R.string.min_temp_key), getResources().getString(R.string.default_min_temp)));
-        int HIGH_TEMPERATURE = Integer.parseInt(sharedPrefs.getString(getResources().getString(R.string.max_temp_key), getResources().getString(R.string.default_max_temp)));
+        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+        int LOW_TEMPERATURE = Integer.parseInt(sharedPrefs
+                .getString(getResources().getString(R.string.min_temp_key),
+                        getResources().getString(R.string.default_min_temp)));
+        int HIGH_TEMPERATURE = Integer.parseInt(sharedPrefs
+                .getString(getResources().getString(R.string.max_temp_key),
+                        getResources().getString(R.string.default_max_temp)));
         if (temperature_value < LOW_TEMPERATURE) {
             mTempImage.setBackground(getResources().getDrawable(R.drawable.low));
             mTextViewTemp.setTextColor(Color.RED);
-        } else if (LOW_TEMPERATURE < temperature_value &&
-                temperature_value < HIGH_TEMPERATURE) {
+        } else if (LOW_TEMPERATURE < temperature_value && temperature_value < HIGH_TEMPERATURE) {
             mTempImage.setBackground(getResources().getDrawable(R.drawable.optimal));
-            mTextViewTemp.setTextColor(Color.GREEN);
+            mTextViewTemp.setTextColor(getResources().getColor(R.color.textColorGreen));
         } else {
             mTempImage.setBackground(getResources().getDrawable(R.drawable.high));
             mTextViewTemp.setTextColor(Color.RED);
         }
-        mTextViewTemp.setText("Temp: " + temperature_value + "˚C, Hum. " + hum_value);
+        mTextViewTemp.setText(temperature_value + "˚C, " + hum_value + "mbar");
         mTempImage.setVisibility(View.VISIBLE);
         mTempImage.invalidate();
     }
 
     private void subscribeForLightUpdates(TransmitterDevice device) {
-        Subscription webSocketSubscription =
+        mWebSocketSubscriptionLight =
                 RelayrSdk.getWebSocketClient().subscribe(device, new Subscriber<Object>() {
 
                     @Override
@@ -269,18 +290,22 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
 
     private void updateLightUI() {
         if (light_value != 0) {
-            mLightImage
-                    .setBackground(getResources().getDrawable(R.drawable.light_on));
+            mLightImage.setBackground(getResources().getDrawable(R.drawable.light_on));
+            if (sound_value < 40.0f) {
+                mLightErrorMsg.setTextColor(Color.RED);
+                mLightErrorMsg.setText(getResources().getText(R.string.room_is_empty));
+            } else {
+                mLightErrorMsg.setText("");
+            }
         } else {
-            mLightImage.setBackground(
-                    getResources().getDrawable(R.drawable.light_off));
+            mLightImage.setBackground(getResources().getDrawable(R.drawable.light_off));
         }
         mLightImage.invalidate();
         mLightImage.setVisibility(View.VISIBLE);
     }
 
     private void subscribeForSoundUpdates(TransmitterDevice device) {
-        Subscription webSocketSubscription =
+        mWebSocketSubscriptionSound =
                 RelayrSdk.getWebSocketClient().subscribe(device, new Subscriber<Object>() {
 
                     @Override
@@ -302,15 +327,17 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
     }
 
     private void updateSoundUI() {
-        SharedPreferences sharedPrefs = PreferenceManager
-                .getDefaultSharedPreferences(this);
-        int soundLevel = Integer.parseInt(sharedPrefs.getString(getResources().getString(R.string.sound_limit_key), getResources().getString(R.string.sound_limit_default)));
-        mTextViewSound.setText("Sound: " + sound_value + "dB");
-        if (sound_value > soundLevel){
+        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+        int soundLevel = Integer.parseInt(sharedPrefs
+                .getString(getResources().getString(R.string.sound_limit_key),
+                        getResources().getString(R.string.sound_limit_default)));
+        mTextViewSound.setText(sound_value + "dB");
+        if (sound_value > soundLevel) {
             mTextViewSound.setTextColor(Color.RED);
         } else {
-            mTextViewSound.setTextColor(Color.GREEN);
+            mTextViewSound.setTextColor(getResources().getColor(R.color.textColorGreen));
         }
+        updateNoise((int)sound_value);
     }
 
     @Override
@@ -330,4 +357,45 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
                 return super.onOptionsItemSelected(item);
         }
     }
+
+    private void unSubscribeToUpdates() {
+        if (mUserInfoSubscription != null && !mUserInfoSubscription.isUnsubscribed()) {
+            mUserInfoSubscription.unsubscribe();
+        }
+        if (mDeviceSubscription != null && !mDeviceSubscription.isUnsubscribed()) {
+            mDeviceSubscription.unsubscribe();
+        }
+        if (mWebSocketSubscriptionLight != null && !mWebSocketSubscriptionLight.isUnsubscribed()) {
+            mWebSocketSubscriptionLight.unsubscribe();
+        }
+        if (mWebSocketSubscriptionSound != null && !mWebSocketSubscriptionSound.isUnsubscribed()) {
+            mWebSocketSubscriptionSound.unsubscribe();
+        }
+        if (mWebSocketSubscriptionTemp != null && !mWebSocketSubscriptionTemp.isUnsubscribed()) {
+            mWebSocketSubscriptionTemp.unsubscribe();
+        }
+    }
+
+    private void updateNoise(final int decibels) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                int noiseLevel = caculateNoiseLevel(decibels);
+                mNoiseProgressBar.setProgress(noiseLevel);
+            }
+        });
+    }
+
+    private int caculateNoiseLevel(int decibels) {
+        int level = 0;
+        if (decibels > DECIBELS_MIN) {
+            if (decibels < DECIBELS_MAX) {
+                level = (int) (( (float) decibels / (float) (DECIBELS_MAX - DECIBELS_MIN) ) *100 );
+            } else {
+                level = 100;
+            }
+        }
+        return level;
+    }
+
 }

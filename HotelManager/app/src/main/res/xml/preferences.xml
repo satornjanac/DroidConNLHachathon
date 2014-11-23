@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <EditTextPreference
+        android:defaultValue="20"
+        android:dialogTitle="@string/sound_level"
+        android:key="noise_level_preference"
+        android:summary="@string/sound_level_summary"
+        android:title="@string/sound_level" />
+
+    <ListPreference
+        android:dialogTitle="@string/min_temperature"
+        android:entries="@array/temperature_values"
+        android:entryValues="@array/temperature_values"
+        android:key="min_temperature_preference"
+        android:summary="@string/min_temperature_sum"
+        android:title="@string/min_temperature"
+        />
+
+    <ListPreference
+        android:dialogTitle="@string/max_temperature"
+        android:entries="@array/temperature_values"
+        android:entryValues="@array/temperature_values"
+        android:key="max_temperature_preference"
+        android:summary="@string/max_temperature_sum"
+        android:title="@string/max_temperature" />
+
+
+</PreferenceScreen>

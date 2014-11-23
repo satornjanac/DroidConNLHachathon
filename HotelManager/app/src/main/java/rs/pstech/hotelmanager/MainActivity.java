@@ -1,5 +1,6 @@
 package rs.pstech.hotelmanager;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
@@ -42,11 +43,9 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
         }
         mTextViewMain = (TextView)findViewById(R.id.textview_main);
 
-        // fensi tranzicija
-/*        ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(
-                activity, transitionView, DetailActivity.EXTRA_IMAGE);
-        ActivityCompat.startActivity(activity, new Intent(activity, DetailActivity.class),
-                options.toBundle());*/
+        Intent intent = new Intent(this, PreferencesActivity.class);
+        overridePendingTransition(0,0);
+        startActivity(intent);
     }
 
     @Override

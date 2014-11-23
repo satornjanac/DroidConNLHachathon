@@ -5,7 +5,6 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -16,25 +15,13 @@ import android.widget.TextView;
 
 import com.google.gson.Gson;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import io.relayr.LoginEventListener;
 import io.relayr.RelayrSdk;
-import io.relayr.model.DeviceModel;
 import io.relayr.model.Reading;
-import io.relayr.model.Transmitter;
 import io.relayr.model.TransmitterDevice;
-import io.relayr.model.User;
-import rx.Observable;
 import rx.Subscriber;
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Func1;
-import rx.schedulers.Schedulers;
 
 
-public class MainActivity extends ActionBarActivity implements LoginEventListener {
+public class MainActivity extends AbsWunderbarActivity {
 
     private TextView mTextViewSound;
     private TextView mTextViewTemp;
@@ -55,12 +42,6 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
     private float sound_value;
     private float temperature_value;
     private float hum_value;
-
-    private Subscription mWebSocketSubscriptionSound;
-    private Subscription mWebSocketSubscriptionTemp;
-    private Subscription mWebSocketSubscriptionLight;
-    private Subscription mUserInfoSubscription;
-    private Subscription mDeviceSubscription;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,11 +74,7 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
         }
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        unSubscribeToUpdates();
-    }
+
 
     private void init() {
         mTextViewSound = (TextView) findViewById(R.id.textview_sound);
@@ -134,93 +111,7 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        if (!RelayrSdk.isUserLoggedIn()) {
-            RelayrSdk.logIn(this, this);
-        } else {
-            onLoggedIn();
-        }
-    }
-
-    private void onLoggedIn() {
-        mUserInfoSubscription =
-                RelayrSdk.getRelayrApi().getUserInfo().subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(new Subscriber<User>() {
-                            @Override
-                            public void onCompleted() {
-                            }
-
-                            @Override
-                            public void onError(Throwable e) {
-                            }
-
-                            @Override
-                            public void onNext(User user) {
-                                loadDevices(user);
-                            }
-                        });
-    }
-
-    @Override
-    public void onSuccessUserLogIn() {
-        onLoggedIn();
-    }
-
-    @Override
-    public void onErrorLogin(Throwable throwable) {
-
-    }
-
-    private void loadDevices(User user) {
-        mDeviceSubscription =
-                RelayrSdk.getRelayrApi().getTransmitters(user.id).flatMap(
-                        new Func1<List<Transmitter>, Observable<List<TransmitterDevice>>>() {
-                            @Override
-                            public Observable<List<TransmitterDevice>> call(
-                                    List<Transmitter> transmitters) {
-                                // This is a naive implementation. Users may own many WunderBars or other
-                                // kinds of transmitter.
-                                if (transmitters.isEmpty()) {
-                                    return Observable
-                                            .from(new ArrayList<List<TransmitterDevice>>());
-                                }
-                                return RelayrSdk.getRelayrApi()
-                                        .getTransmitterDevices(transmitters.get(0).id);
-                            }
-                        }
-                ).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(new Subscriber<List<TransmitterDevice>>() {
-                            @Override
-                            public void onCompleted() {
-
-                            }
-
-                            @Override
-                            public void onError(Throwable e) {
-                            }
-
-                            @Override
-                            public void onNext(List<TransmitterDevice> devices) {
-                                for (TransmitterDevice device : devices) {
-                                    if (device.model
-                                            .equals(DeviceModel.TEMPERATURE_HUMIDITY.getId())) {
-                                        subscribeForTemperatureUpdates(device);
-                                    }
-                                    if (device.model.equals(DeviceModel.LIGHT_PROX_COLOR.getId())) {
-                                        subscribeForLightUpdates(device);
-                                    }
-                                    if (device.model.equals(DeviceModel.MICROPHONE.getId())) {
-                                        subscribeForSoundUpdates(device);
-                                    }
-                                }
-                            }
-                        });
-
-    }
-
-    private void subscribeForTemperatureUpdates(TransmitterDevice device) {
+    protected void subscribeForTemperatureUpdates(TransmitterDevice device) {
         mWebSocketSubscriptionTemp =
                 RelayrSdk.getWebSocketClient().subscribe(device, new Subscriber<Object>() {
 
@@ -266,7 +157,8 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
         mTempImage.invalidate();
     }
 
-    private void subscribeForLightUpdates(TransmitterDevice device) {
+    @Override
+    protected void subscribeForLightUpdates(TransmitterDevice device) {
         mWebSocketSubscriptionLight =
                 RelayrSdk.getWebSocketClient().subscribe(device, new Subscriber<Object>() {
 
@@ -304,7 +196,8 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
         mLightImage.setVisibility(View.VISIBLE);
     }
 
-    private void subscribeForSoundUpdates(TransmitterDevice device) {
+    @Override
+    protected void subscribeForSoundUpdates(TransmitterDevice device) {
         mWebSocketSubscriptionSound =
                 RelayrSdk.getWebSocketClient().subscribe(device, new Subscriber<Object>() {
 
@@ -355,24 +248,6 @@ public class MainActivity extends ActionBarActivity implements LoginEventListene
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
-        }
-    }
-
-    private void unSubscribeToUpdates() {
-        if (mUserInfoSubscription != null && !mUserInfoSubscription.isUnsubscribed()) {
-            mUserInfoSubscription.unsubscribe();
-        }
-        if (mDeviceSubscription != null && !mDeviceSubscription.isUnsubscribed()) {
-            mDeviceSubscription.unsubscribe();
-        }
-        if (mWebSocketSubscriptionLight != null && !mWebSocketSubscriptionLight.isUnsubscribed()) {
-            mWebSocketSubscriptionLight.unsubscribe();
-        }
-        if (mWebSocketSubscriptionSound != null && !mWebSocketSubscriptionSound.isUnsubscribed()) {
-            mWebSocketSubscriptionSound.unsubscribe();
-        }
-        if (mWebSocketSubscriptionTemp != null && !mWebSocketSubscriptionTemp.isUnsubscribed()) {
-            mWebSocketSubscriptionTemp.unsubscribe();
         }
     }
 

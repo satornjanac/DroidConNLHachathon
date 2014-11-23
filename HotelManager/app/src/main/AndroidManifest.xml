@@ -10,8 +10,9 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme.Base">
+
         <activity
-            android:name="rs.pstech.hotelmanager.MainActivity"
+            android:name="rs.pstech.hotelmanager.RoomsActivity"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -19,6 +20,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name="rs.pstech.hotelmanager.MainActivity"
+            android:label="@string/app_name"></activity>
 
         <activity
             android:name="rs.pstech.hotelmanager.PreferencesActivity"

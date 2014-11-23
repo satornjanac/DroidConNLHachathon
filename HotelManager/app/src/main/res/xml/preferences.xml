@@ -2,26 +2,29 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <EditTextPreference
-        android:defaultValue="20"
+        android:defaultValue="@string/sound_limit_default"
+        android:inputType="number"
         android:dialogTitle="@string/sound_level"
-        android:key="noise_level_preference"
+        android:key="@string/sound_limit_key"
         android:summary="@string/sound_level_summary"
         android:title="@string/sound_level" />
 
     <ListPreference
+        android:defaultValue="@string/default_min_temp"
         android:dialogTitle="@string/min_temperature"
         android:entries="@array/temperature_values"
         android:entryValues="@array/temperature_values"
-        android:key="min_temperature_preference"
+        android:key="@string/min_temp_key"
         android:summary="@string/min_temperature_sum"
         android:title="@string/min_temperature"
         />
 
     <ListPreference
+        android:defaultValue="@string/default_max_temp"
         android:dialogTitle="@string/max_temperature"
         android:entries="@array/temperature_values"
         android:entryValues="@array/temperature_values"
-        android:key="max_temperature_preference"
+        android:key="@string/max_temp_key"
         android:summary="@string/max_temperature_sum"
         android:title="@string/max_temperature" />
 

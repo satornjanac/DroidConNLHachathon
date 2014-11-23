@@ -9,23 +9,50 @@
     <string name="min_temperature_sum">Set the minimum temperature in celsius bellow which the app will alert you of the coldness in the rooms.</string>
     <string name="max_temperature_sum">Set the maximum temperature in celsius above which the app will alert you of the hotness in the rooms.</string>
     <string name="max_temperature">Maximum allowed temperature</string>
+    <string name="min_temp_key">min_temperature_preference</string>
+    <string name="max_temp_key">max_temperature_preference</string>
+    <string name="sound_limit_key">50</string>
+
+    <string name="default_min_temp">20</string>
+    <string name="default_max_temp">25</string>
+    <string name="sound_limit_default">50</string>
 
     <string-array name="temperature_values">
+        <item>"15"</item>
+        <item>"16"</item>
+        <item>"17"</item>
+        <item>"18"</item>
+        <item>"19"</item>
         <item>"20"</item>
         <item>"21"</item>
         <item>"22"</item>
         <item>"23"</item>
         <item>"24"</item>
         <item>"25"</item>
+        <item>"26"</item>
+        <item>"27"</item>
+        <item>"28"</item>
+        <item>"29"</item>
+        <item>"30"</item>
     </string-array>
 
     <string-array name="temperature_names">
+        <item>"15"</item>
+        <item>"16"</item>
+        <item>"17"</item>
+        <item>"18"</item>
+        <item>"19"</item>
         <item>"20"</item>
         <item>"21"</item>
         <item>"22"</item>
         <item>"23"</item>
         <item>"24"</item>
         <item>"25"</item>
+        <item>"26"</item>
+        <item>"27"</item>
+        <item>"28"</item>
+        <item>"29"</item>
+        <item>"30"</item>
     </string-array>
 
 </resources>

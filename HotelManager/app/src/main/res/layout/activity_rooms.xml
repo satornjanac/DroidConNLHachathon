@@ -10,6 +10,24 @@
         android:layout_height="wrap_content"
         android:background="?attr/colorPrimaryDark" />
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="8dp"
+        android:textSize="24sp"
+        android:text="@string/rooms"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@android:drawable/divider_horizontal_bright"/>
+
+    <ProgressBar
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/progress_bar"
+        android:layout_gravity="center_horizontal"/>
+
     <ListView
         android:id="@+id/listview_rooms"
         android:layout_width="match_parent"
